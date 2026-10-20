@@ -1,198 +1,15 @@
 // PawVault - Dog Medical & Health Data Manager
-// Zero backend needed - Powered by HTML5 LocalStorage & modern web APIs
+// Clean Production Version (Ready for Real Dog Data)
 
 (function() {
   'use strict';
 
-  const STORAGE_KEY = 'pawvault_dogs_data_v1';
-  const ACTIVE_DOG_KEY = 'pawvault_active_dog_id';
+  // v2 keys ensure previous sample data (Cooper/Luna) is cleanly flushed
+  const STORAGE_KEY = 'pawvault_dogs_data_v2';
+  const ACTIVE_DOG_KEY = 'pawvault_active_dog_id_v2';
 
-  // Sample data to initialize app on fresh visit
-  const DEFAULT_DATA = [
-    {
-      id: 'dog_cooper_1',
-      name: 'Cooper',
-      breed: 'Golden Retriever',
-      birthdate: '2022-04-15',
-      gender: 'Male (Neutered)',
-      microchip: '985141002348912',
-      rabiesTag: 'Tag #R-2024-81',
-      allergies: ['Chicken protein', 'Penicillin'],
-      photo: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=400',
-      diet: {
-        food: 'Purina Pro Plan Adult Large Breed (Salmon & Rice Formula)',
-        portion: '3.0 cups total (1.5 cups per meal)',
-        schedule: '7:30 AM & 6:30 PM',
-        treats: 'Carrots, blueberries, plain Greek yogurt, freeze-dried beef liver'
-      },
-      care: {
-        bath: 'Oct 10, 2026 (Every 4 weeks)',
-        nails: 'Oct 15, 2026 (Every 2 weeks)',
-        dental: 'Enzymatic poultry toothpaste 3x per week; dental chews on Fridays',
-        behavior: 'Super friendly with humans and other dogs. Scared of thunderstorms (use anxiety thunderjacket). Loves fetching tennis balls in open dog parks.'
-      },
-      contacts: {
-        primaryVetName: 'Dr. Sarah Jenkins - Green Valley Pet Hospital',
-        primaryVetPhone: '(555) 234-5678',
-        primaryVetAddress: '1420 Oakwood Blvd, Suite 4',
-        emergencyVetName: 'Metro Veterinary Emergency Center (24/7)',
-        emergencyVetPhone: '(555) 911-PETS',
-        emergencyVetAddress: '880 Highway 101 North',
-        insuranceDetails: 'Healthy Paws (#HP-9982410, $500 ded, 90% reinbursement)'
-      },
-      weights: [
-        { id: 'w1', date: '2025-04-15', weight: 29.2, unit: 'kg' },
-        { id: 'w2', date: '2025-10-18', weight: 30.5, unit: 'kg' },
-        { id: 'w3', date: '2026-04-12', weight: 31.0, unit: 'kg' },
-        { id: 'w4', date: '2026-08-01', weight: 31.8, unit: 'kg' },
-        { id: 'w5', date: '2026-10-15', weight: 31.5, unit: 'kg' }
-      ],
-      vaccines: [
-        {
-          id: 'vac_1',
-          name: 'Rabies (3-Year)',
-          adminDate: '2024-05-10',
-          dueDate: '2027-05-10',
-          batch: 'DEF-8839-RB',
-          vet: 'Dr. Sarah Jenkins'
-        },
-        {
-          id: 'vac_2',
-          name: 'DHPP / DAP (Distemper, Parvo, Adeno)',
-          adminDate: '2025-06-14',
-          dueDate: '2028-06-14',
-          batch: 'DHPP-9901-B',
-          vet: 'Dr. Sarah Jenkins'
-        },
-        {
-          id: 'vac_3',
-          name: 'Bordetella (Kennel Cough)',
-          adminDate: '2026-04-10',
-          dueDate: '2026-11-05', // Due soon!
-          batch: 'BOR-2201',
-          vet: 'Green Valley Pet Hospital'
-        },
-        {
-          id: 'vac_4',
-          name: 'Leptospirosis (4-Way)',
-          adminDate: '2025-11-15',
-          dueDate: '2026-11-15', // Due soon!
-          batch: 'LEP-772',
-          vet: 'Dr. Sarah Jenkins'
-        }
-      ],
-      medications: [
-        {
-          id: 'med_1',
-          name: 'Simparica Trio',
-          dosage: '1 Chewable Tablet (44.1 - 88 lbs)',
-          frequency: 'Monthly (1st of each month)',
-          category: 'Flea / Tick / Heartworm',
-          nextDue: '2026-11-01',
-          notes: 'Give with dinner food. Protects against heartworm, ticks, and fleas.',
-          active: true
-        },
-        {
-          id: 'med_2',
-          name: 'Wild Alaskan Salmon Oil',
-          dosage: '2 pumps (5 ml)',
-          frequency: 'Daily with breakfast',
-          category: 'Supplement / Vitamin',
-          nextDue: '',
-          notes: 'Omega-3 fatty acids for joint health and glossy coat.',
-          active: true
-        }
-      ],
-      visits: [
-        {
-          id: 'vis_1',
-          date: '2026-06-12',
-          reason: 'Annual Comprehensive Wellness Exam & Blood Panel',
-          clinic: 'Green Valley Pet Hospital',
-          cost: 215.00,
-          notes: 'Vitals normal. Heart and lungs clear. Teeth show mild tartar on upper molars; recommend dental chews. Weight ideal at 31.5kg.',
-          followUp: 'Annual wellness check in June 2027'
-        },
-        {
-          id: 'vis_2',
-          date: '2026-02-18',
-          reason: 'Ear Scratching & Shaking Head Checkup',
-          clinic: 'Green Valley Pet Hospital',
-          cost: 110.00,
-          notes: 'Mild yeast infection in left ear canal. Cleaned and treated with Osurnia otic gel. Avoid water getting in ears during baths.',
-          followUp: 'Resolved after 7 days'
-        },
-        {
-          id: 'vis_3',
-          date: '2025-06-14',
-          reason: '3-Year Core Vaccinations & Heartworm Test',
-          clinic: 'Green Valley Pet Hospital',
-          cost: 175.00,
-          notes: 'Heartworm 4DX test negative. Administered DHPP booster. Patient behaved wonderfully.',
-          followUp: 'Bordetella due in spring'
-        }
-      ]
-    },
-    {
-      id: 'dog_luna_2',
-      name: 'Luna',
-      breed: 'French Bulldog',
-      birthdate: '2023-08-10',
-      gender: 'Female (Spayed)',
-      microchip: '985141009841203',
-      rabiesTag: 'Tag #R-2024-99',
-      allergies: ['Grass pollens'],
-      photo: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=400',
-      diet: {
-        food: 'Royal Canin French Bulldog Adult',
-        portion: '1.5 cups daily (0.75 cup per meal)',
-        schedule: '8:00 AM & 6:00 PM',
-        treats: 'Dehydrated sweet potato slices'
-      },
-      care: {
-        bath: 'Every 3 weeks with hypoallergenic oatmeal shampoo',
-        nails: 'Every 2 weeks',
-        dental: 'Daily dental wipe',
-        behavior: 'Loves sleeping on the couch. Sensitive to hot weather due to brachycephalic airway.'
-      },
-      contacts: {
-        primaryVetName: 'Dr. Jenkins',
-        primaryVetPhone: '(555) 234-5678',
-        primaryVetAddress: 'Green Valley Pet Hospital',
-        emergencyVetName: 'Metro 24/7 Animal ER',
-        emergencyVetPhone: '(555) 911-PETS',
-        emergencyVetAddress: '880 Highway 101 North',
-        insuranceDetails: 'Trupanion (#TRU-491209)'
-      },
-      weights: [
-        { id: 'w_luna1', date: '2026-01-10', weight: 11.2, unit: 'kg' },
-        { id: 'w_luna2', date: '2026-08-15', weight: 12.0, unit: 'kg' }
-      ],
-      vaccines: [
-        {
-          id: 'v_luna1',
-          name: 'Rabies (1-Year)',
-          adminDate: '2026-01-15',
-          dueDate: '2027-01-15',
-          batch: 'RAB-2026-X',
-          vet: 'Dr. Jenkins'
-        }
-      ],
-      medications: [
-        {
-          id: 'm_luna1',
-          name: 'NexGard Chewables',
-          dosage: '1 Chew (24-60 lbs)',
-          frequency: 'Monthly',
-          category: 'Flea / Tick / Heartworm',
-          nextDue: '2026-11-01',
-          notes: 'Administer with breakfast.',
-          active: true
-        }
-      ],
-      visits: []
-    }
-  ];
+  // Empty by default for real user data
+  const DEFAULT_DATA = [];
 
   // App State
   let dogsData = [];
@@ -201,11 +18,22 @@
 
   // Initialize
   function init() {
+    // Purge legacy sample data if present in browser localStorage
+    try {
+      localStorage.removeItem('pawvault_dogs_data_v1');
+      localStorage.removeItem('pawvault_active_dog_id');
+    } catch (e) {}
+
     loadData();
     setupEventListeners();
     renderDogSelector();
     renderActiveDog();
     initWeightChart();
+
+    // If no dog exists yet, automatically prompt the user to add their real dog
+    if (dogsData.length === 0) {
+      document.getElementById('noDogBanner').classList.remove('hidden');
+    }
   }
 
   // Load from LocalStorage
@@ -215,12 +43,11 @@
       if (stored) {
         dogsData = JSON.parse(stored);
       } else {
-        dogsData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-        saveData();
+        dogsData = [];
       }
     } catch (e) {
       console.error('Error loading data from localStorage:', e);
-      dogsData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      dogsData = [];
     }
 
     activeDogId = localStorage.getItem(ACTIVE_DOG_KEY);
@@ -236,16 +63,18 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dogsData));
       if (activeDogId) {
         localStorage.setItem(ACTIVE_DOG_KEY, activeDogId);
+      } else {
+        localStorage.removeItem(ACTIVE_DOG_KEY);
       }
     } catch (e) {
       console.error('Error saving data to localStorage:', e);
-      showToast('Error saving data! Local storage might be full.', 'error');
+      showToast('Error saving data! Storage might be full.', 'error');
     }
   }
 
   // Get active dog helper
   function getActiveDog() {
-    return dogsData.find(d => d.id === activeDogId) || dogsData[0];
+    return dogsData.find(d => d.id === activeDogId) || null;
   }
 
   // Setup Event Listeners
@@ -256,7 +85,8 @@
       activeDogId = e.target.value;
       localStorage.setItem(ACTIVE_DOG_KEY, activeDogId);
       renderActiveDog();
-      showToast(`Switched profile to ${getActiveDog().name}`);
+      const dog = getActiveDog();
+      if (dog) showToast(`Switched profile to ${dog.name}`);
     });
 
     // Navigation Tabs
@@ -289,11 +119,19 @@
     const avatarInput = document.getElementById('avatarUploadInput');
     avatarInput.addEventListener('change', handleAvatarUpload);
 
-    // Add New Dog Button
+    // Add Dog Buttons
     document.getElementById('addDogBtn').addEventListener('click', () => openDogModal());
+    document.getElementById('bannerAddDogBtn').addEventListener('click', () => openDogModal());
 
     // Edit Dog Profile Button
-    document.getElementById('editDogProfileBtn').addEventListener('click', () => openDogModal(getActiveDog()));
+    document.getElementById('editDogProfileBtn').addEventListener('click', () => {
+      const dog = getActiveDog();
+      if (dog) {
+        openDogModal(dog);
+      } else {
+        openDogModal();
+      }
+    });
 
     // Delete Dog Button
     document.getElementById('deleteDogBtn').addEventListener('click', handleDeleteDog);
@@ -302,29 +140,76 @@
     document.getElementById('dogForm').addEventListener('submit', handleSaveDog);
 
     // Log Vaccination
-    document.getElementById('addVaccineBtn').addEventListener('click', () => openVaccineModal());
+    document.getElementById('addVaccineBtn').addEventListener('click', () => {
+      if (!ensureDogSelected()) return;
+      openVaccineModal();
+    });
     document.getElementById('vaccineForm').addEventListener('submit', handleSaveVaccine);
 
     // Add Medication
-    document.getElementById('addMedicationBtn').addEventListener('click', () => openMedicationModal());
+    document.getElementById('addMedicationBtn').addEventListener('click', () => {
+      if (!ensureDogSelected()) return;
+      openMedicationModal();
+    });
     document.getElementById('medicationForm').addEventListener('submit', handleSaveMedication);
 
     // Log Vet Visit
-    document.getElementById('addVisitBtn').addEventListener('click', () => openVisitModal());
+    document.getElementById('addVisitBtn').addEventListener('click', () => {
+      if (!ensureDogSelected()) return;
+      openVisitModal();
+    });
     document.getElementById('visitForm').addEventListener('submit', handleSaveVisit);
 
     // Log Weight Form
-    document.getElementById('weightLogForm').addEventListener('submit', handleSaveWeight);
+    document.getElementById('weightLogForm').addEventListener('submit', (e) => {
+      if (!ensureDogSelected()) {
+        e.preventDefault();
+        return;
+      }
+      handleSaveWeight(e);
+    });
 
     // Edit Diet Button
-    document.getElementById('editDietBtn').addEventListener('click', openDietModal);
-    document.getElementById('editCareNotesBtn').addEventListener('click', openDietModal);
+    document.getElementById('editDietBtn').addEventListener('click', () => {
+      if (!ensureDogSelected()) return;
+      openDietModal();
+    });
+    document.getElementById('editCareNotesBtn').addEventListener('click', () => {
+      if (!ensureDogSelected()) return;
+      openDietModal();
+    });
     document.getElementById('dietCareForm').addEventListener('submit', handleSaveDietCare);
 
     // Edit Contacts Button & Quick Emergency Button
-    document.getElementById('editContactsBtn').addEventListener('click', openContactsModal);
-    document.getElementById('quickEmergencyModalBtn').addEventListener('click', openContactsModal);
+    document.getElementById('editContactsBtn').addEventListener('click', () => {
+      if (!ensureDogSelected()) return;
+      openContactsModal();
+    });
+    document.getElementById('quickEmergencyModalBtn').addEventListener('click', () => {
+      if (!ensureDogSelected()) return;
+      openContactsModal();
+    });
     document.getElementById('contactsForm').addEventListener('submit', handleSaveContacts);
+
+    // Primary Vet and Emergency Call button handlers
+    document.getElementById('callPrimaryVetBtn').addEventListener('click', () => {
+      const dog = getActiveDog();
+      const phone = dog?.contacts?.primaryVetPhone;
+      if (phone) {
+        window.location.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+      } else {
+        showToast('No phone number saved. Click "Update Contacts" to add one.', 'error');
+      }
+    });
+    document.getElementById('callEmergencyVetBtn').addEventListener('click', () => {
+      const dog = getActiveDog();
+      const phone = dog?.contacts?.emergencyVetPhone;
+      if (phone) {
+        window.location.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+      } else {
+        showToast('No emergency phone saved. Click "Update Contacts" to add one.', 'error');
+      }
+    });
 
     // Settings Dropdown Toggle
     const settingsBtn = document.getElementById('settingsMenuBtn');
@@ -343,21 +228,9 @@
     // Import JSON
     document.getElementById('importDataInput').addEventListener('change', handleImportJSON);
 
-    // Reset Sample Data
-    document.getElementById('loadSampleDataBtn').addEventListener('click', () => {
-      if (confirm('Reset to standard sample dogs and medical records? Current local changes will be replaced.')) {
-        dogsData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-        activeDogId = dogsData[0].id;
-        saveData();
-        renderDogSelector();
-        renderActiveDog();
-        showToast('Sample data reloaded.');
-      }
-    });
-
     // Clear All Data
     document.getElementById('clearAllDataBtn').addEventListener('click', () => {
-      if (confirm('Are you sure you want to completely clear all dog data? This cannot be undone!')) {
+      if (confirm('Are you sure you want to completely clear all dog data? This will remove all records.')) {
         dogsData = [];
         activeDogId = null;
         saveData();
@@ -369,13 +242,21 @@
 
     // Close Modals
     document.querySelectorAll('.closeModalBtn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        closeAllModals();
-      });
+      btn.addEventListener('click', closeAllModals);
     });
 
     // Print Vet Summary Sheet Button
     document.getElementById('printVetSummaryBtn').addEventListener('click', handlePrintSummary);
+  }
+
+  function ensureDogSelected() {
+    const dog = getActiveDog();
+    if (!dog) {
+      alert('Please add your dog\'s profile first.');
+      openDogModal();
+      return false;
+    }
+    return true;
   }
 
   function closeAllModals() {
@@ -387,7 +268,7 @@
     const selector = document.getElementById('dogSelector');
     selector.innerHTML = '';
     if (dogsData.length === 0) {
-      selector.innerHTML = '<option value="">No dogs yet</option>';
+      selector.innerHTML = '<option value="">No dog added yet</option>';
       return;
     }
 
@@ -449,29 +330,62 @@
   // Render Active Dog Data in UI
   function renderActiveDog() {
     const dog = getActiveDog();
+    const noDogBanner = document.getElementById('noDogBanner');
+
     if (!dog) {
       // Empty state
-      document.getElementById('dogName').textContent = 'No Dog Profile';
-      document.getElementById('dogBreed').textContent = 'Click "New Dog" above to create one';
-      document.getElementById('profileAvatar').src = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300';
-      document.getElementById('dogGenderBadge').textContent = 'None';
+      noDogBanner.classList.remove('hidden');
+      document.getElementById('dogName').textContent = 'No Dog Added Yet';
+      document.getElementById('dogBreed').textContent = 'Click "+ Add Dog" to enter your dog\'s real details';
+      document.getElementById('dogGenderBadge').textContent = '-';
       document.getElementById('dogAgeText').textContent = '-';
-      document.getElementById('dogWeightText').textContent = '-';
-      document.getElementById('dogMicrochipText').textContent = '-';
-      document.getElementById('dogRabiesTagText').textContent = '-';
-      document.getElementById('dogAllergiesBanner').innerHTML = '';
-      document.getElementById('vaccinesTableBody').innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">No profile selected</td></tr>';
-      document.getElementById('medicationsGrid').innerHTML = '<p class="text-slate-400">No profile selected</p>';
-      document.getElementById('visitsList').innerHTML = '<p class="text-slate-400">No profile selected</p>';
+      document.getElementById('dogWeightText').textContent = 'No weight logged';
+      document.getElementById('dogMicrochipText').textContent = 'No Microchip';
+      document.getElementById('dogRabiesTagText').textContent = 'No Rabies Tag';
+      document.getElementById('dogAllergiesBanner').innerHTML = '<span class="text-xs text-slate-400 italic">No dog profile active</span>';
+
+      // Avatar
+      document.getElementById('profileAvatar').classList.add('hidden');
+      document.getElementById('profileAvatarPlaceholder').classList.remove('hidden');
+
+      // Subsections
+      document.getElementById('vaccinesTableBody').innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">No vaccination records logged yet.</td></tr>';
+      document.getElementById('medicationsGrid').innerHTML = '<div class="col-span-full py-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">No medications logged yet.</div>';
+      document.getElementById('visitsList').innerHTML = '<div class="py-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">No vet visits recorded yet.</div>';
+      document.getElementById('weightHistoryLog').innerHTML = '<p class="text-xs text-slate-400 py-3 text-center">No weight logged yet.</p>';
+      document.getElementById('remindersBanner').innerHTML = '';
+
+      // Diet & care placeholders
+      renderDietCare(null);
+      renderContacts(null);
+
+      document.getElementById('badgeVaccineCount').textContent = '0';
+      document.getElementById('badgeMedCount').textContent = '0';
+      document.getElementById('badgeVisitCount').textContent = '0';
+
+      updateWeightChart();
       return;
     }
+
+    noDogBanner.classList.add('hidden');
 
     // Header Info
     document.getElementById('dogName').textContent = dog.name;
     document.getElementById('dogBreed').textContent = dog.breed;
     document.getElementById('dogGenderBadge').textContent = dog.gender || 'Unknown';
-    document.getElementById('profileAvatar').src = dog.photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300';
     document.getElementById('dogAgeText').textContent = calculateAge(dog.birthdate);
+
+    // Avatar
+    const imgEl = document.getElementById('profileAvatar');
+    const placeholderEl = document.getElementById('profileAvatarPlaceholder');
+    if (dog.photo) {
+      imgEl.src = dog.photo;
+      imgEl.classList.remove('hidden');
+      placeholderEl.classList.add('hidden');
+    } else {
+      imgEl.classList.add('hidden');
+      placeholderEl.classList.remove('hidden');
+    }
 
     // Latest Weight
     const latestWeight = (dog.weights && dog.weights.length > 0) ? dog.weights[dog.weights.length - 1] : null;
@@ -484,8 +398,8 @@
     }
 
     // Microchip & Rabies
-    document.getElementById('dogMicrochipText').textContent = dog.microchip ? `Microchip: ${dog.microchip}` : 'No Microchip recorded';
-    document.getElementById('dogRabiesTagText').textContent = dog.rabiesTag || 'No Rabies Tag recorded';
+    document.getElementById('dogMicrochipText').textContent = dog.microchip ? `Microchip: ${dog.microchip}` : 'No Microchip';
+    document.getElementById('dogRabiesTagText').textContent = dog.rabiesTag ? `Tag: ${dog.rabiesTag}` : 'No Rabies Tag';
 
     // Allergies
     const allergiesContainer = document.getElementById('dogAllergiesBanner');
@@ -525,6 +439,7 @@
   function renderRemindersBanner(dog) {
     const banner = document.getElementById('remindersBanner');
     banner.innerHTML = '';
+    if (!dog) return;
 
     const alerts = [];
 
@@ -563,9 +478,7 @@
       }
     });
 
-    if (alerts.length === 0) {
-      return; // No reminders need to be shown
-    }
+    if (alerts.length === 0) return;
 
     alerts.forEach(item => {
       const alertDiv = document.createElement('div');
@@ -590,6 +503,7 @@
   function renderVaccines(dog) {
     const tbody = document.getElementById('vaccinesTableBody');
     tbody.innerHTML = '';
+    if (!dog) return;
 
     const list = dog.vaccines || [];
     if (list.length === 0) {
@@ -611,7 +525,7 @@
         </td>
         <td class="px-6 py-4 text-slate-600">${formatDate(vac.adminDate)}</td>
         <td class="px-6 py-4 font-medium ${status.isUrgent ? 'text-rose-700' : (status.isWarning ? 'text-amber-700' : 'text-slate-800')}">${formatDate(vac.dueDate)}</td>
-        <td class="px-6 py-4 text-slate-600">${escapeHtml(vac.vet || 'Vet Clinic')}</td>
+        <td class="px-6 py-4 text-slate-600">${escapeHtml(vac.vet || '-')}</td>
         <td class="px-6 py-4">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${status.class}">
             <i class="fa-solid ${status.icon} mr-1 text-[10px]"></i> ${status.label}
@@ -625,7 +539,6 @@
       tbody.appendChild(tr);
     });
 
-    // Attach actions
     tbody.querySelectorAll('.edit-vac-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const vac = list.find(v => v.id === btn.getAttribute('data-id'));
@@ -649,6 +562,7 @@
   function renderMedications(dog) {
     const grid = document.getElementById('medicationsGrid');
     grid.innerHTML = '';
+    if (!dog) return;
 
     const list = dog.medications || [];
     if (list.length === 0) {
@@ -692,7 +606,6 @@
       grid.appendChild(card);
     });
 
-    // Med actions
     grid.querySelectorAll('.toggle-med-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
@@ -727,6 +640,7 @@
   function renderVisits(dog) {
     const container = document.getElementById('visitsList');
     container.innerHTML = '';
+    if (!dog) return;
 
     const list = dog.visits || [];
     if (list.length === 0) {
@@ -734,7 +648,6 @@
       return;
     }
 
-    // Sort descending by date
     const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     sorted.forEach(visit => {
@@ -783,6 +696,7 @@
   function renderWeightLog(dog) {
     const listContainer = document.getElementById('weightHistoryLog');
     listContainer.innerHTML = '';
+    if (!dog) return;
 
     const weights = dog.weights || [];
     if (weights.length === 0) {
@@ -883,10 +797,8 @@
       return;
     }
 
-    // Sort ascending for timeline
     const sorted = [...dog.weights].sort((a, b) => new Date(a.date) - new Date(b.date));
     const labels = sorted.map(w => formatDate(w.date));
-    // Normalize to kg for the line chart
     const dataValues = sorted.map(w => {
       return w.unit === 'lbs' ? parseFloat((w.weight * 0.453592).toFixed(2)) : parseFloat(w.weight);
     });
@@ -898,34 +810,32 @@
 
   // Render Diet & Care Tab
   function renderDietCare(dog) {
-    const diet = dog.diet || {};
-    const care = dog.care || {};
+    const diet = dog?.diet || {};
+    const care = dog?.care || {};
 
-    document.getElementById('dietFoodBrand').textContent = diet.food || 'None specified';
-    document.getElementById('dietPortion').textContent = diet.portion || 'None specified';
-    document.getElementById('dietSchedule').textContent = diet.schedule || 'None specified';
-    document.getElementById('dietTreats').textContent = diet.treats || 'None specified';
+    document.getElementById('dietFoodBrand').textContent = diet.food || 'Not recorded yet';
+    document.getElementById('dietPortion').textContent = diet.portion || 'Not recorded';
+    document.getElementById('dietSchedule').textContent = diet.schedule || 'Not recorded';
+    document.getElementById('dietTreats').textContent = diet.treats || 'None listed';
 
-    document.getElementById('careLastBath').textContent = care.bath || 'Not tracked';
-    document.getElementById('careLastNails').textContent = care.nails || 'Not tracked';
-    document.getElementById('careDental').textContent = care.dental || 'Not tracked';
+    document.getElementById('careLastBath').textContent = care.bath || 'Not recorded';
+    document.getElementById('careLastNails').textContent = care.nails || 'Not recorded';
+    document.getElementById('careDental').textContent = care.dental || 'Not recorded';
     document.getElementById('careBehavior').textContent = care.behavior || 'No behavioral notes added yet.';
   }
 
   // Render Contacts Tab
   function renderContacts(dog) {
-    const c = dog.contacts || {};
-    document.getElementById('contactPrimaryVetName').textContent = c.primaryVetName || 'Primary Vet Clinic';
-    document.getElementById('contactPrimaryVetPhone').textContent = c.primaryVetPhone || 'No phone recorded';
+    const c = dog?.contacts || {};
+    document.getElementById('contactPrimaryVetName').textContent = c.primaryVetName || 'Not added yet';
+    document.getElementById('contactPrimaryVetPhone').textContent = c.primaryVetPhone || 'No phone number';
     document.getElementById('contactPrimaryVetAddress').textContent = c.primaryVetAddress || 'No address';
-    document.getElementById('callPrimaryVetLink').href = c.primaryVetPhone ? `tel:${c.primaryVetPhone.replace(/[^0-9+]/g, '')}` : '#';
 
-    document.getElementById('contactEmergencyVetName').textContent = c.emergencyVetName || '24/7 Emergency Animal Hospital';
-    document.getElementById('contactEmergencyVetPhone').textContent = c.emergencyVetPhone || 'No emergency phone recorded';
-    document.getElementById('contactEmergencyVetAddress').textContent = c.emergencyVetAddress || 'No emergency address';
-    document.getElementById('callEmergencyVetLink').href = c.emergencyVetPhone ? `tel:${c.emergencyVetPhone.replace(/[^0-9+]/g, '')}` : '#';
+    document.getElementById('contactEmergencyVetName').textContent = c.emergencyVetName || 'Not added yet';
+    document.getElementById('contactEmergencyVetPhone').textContent = c.emergencyVetPhone || 'No emergency phone';
+    document.getElementById('contactEmergencyVetAddress').textContent = c.emergencyVetAddress || 'No address';
 
-    document.getElementById('contactInsuranceText').textContent = c.insuranceDetails || 'No insurance policy recorded';
+    document.getElementById('contactInsuranceText').textContent = c.insuranceDetails || 'Not recorded';
   }
 
   // ---------------- FORM HANDLERS & MODALS ----------------
@@ -948,7 +858,7 @@
       document.getElementById('formDogRabiesTag').value = dogToEdit.rabiesTag || '';
       document.getElementById('formDogAllergies').value = (dogToEdit.allergies || []).join(', ');
     } else {
-      title.textContent = 'Add New Dog Profile';
+      title.textContent = 'Add Real Dog Profile';
       deleteBtn.classList.add('hidden');
       document.getElementById('dogForm').reset();
       document.getElementById('formDogId').value = '';
@@ -970,7 +880,6 @@
     const allergies = allergiesStr ? allergiesStr.split(',').map(s => s.trim()).filter(Boolean) : [];
 
     if (id) {
-      // Edit existing
       const dog = dogsData.find(d => d.id === id);
       if (dog) {
         dog.name = name;
@@ -982,7 +891,6 @@
         dog.allergies = allergies;
       }
     } else {
-      // Create new
       const newDog = {
         id: 'dog_' + Date.now(),
         name,
@@ -992,7 +900,7 @@
         microchip,
         rabiesTag,
         allergies,
-        photo: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300',
+        photo: '',
         diet: { food: '', portion: '', schedule: '', treats: '' },
         care: { bath: '', nails: '', dental: '', behavior: '' },
         contacts: {
@@ -1017,7 +925,7 @@
     renderDogSelector();
     renderActiveDog();
     closeAllModals();
-    showToast(`Dog profile for ${name} saved!`);
+    showToast(`Saved dog profile for ${name}!`);
   }
 
   function handleDeleteDog() {
@@ -1025,7 +933,7 @@
     const dog = dogsData.find(d => d.id === id);
     if (!dog) return;
 
-    if (confirm(`Are you sure you want to delete ${dog.name}'s entire profile and medical history?`)) {
+    if (confirm(`Are you sure you want to delete ${dog.name}'s profile and all medical records?`)) {
       dogsData = dogsData.filter(d => d.id !== id);
       activeDogId = dogsData.length > 0 ? dogsData[0].id : null;
       saveData();
@@ -1038,6 +946,12 @@
 
   // Avatar Upload (FileReader -> DataURL in LocalStorage)
   function handleAvatarUpload(e) {
+    const dog = getActiveDog();
+    if (!dog) {
+      alert('Please add a dog profile first before uploading a photo.');
+      return;
+    }
+
     const file = e.target.files[0];
     if (!file) return;
 
@@ -1048,14 +962,10 @@
 
     const reader = new FileReader();
     reader.onload = function(evt) {
-      const base64 = evt.target.result;
-      const dog = getActiveDog();
-      if (dog) {
-        dog.photo = base64;
-        saveData();
-        renderActiveDog();
-        showToast('Profile photo updated!');
-      }
+      dog.photo = evt.target.result;
+      saveData();
+      renderActiveDog();
+      showToast('Profile photo updated!');
     };
     reader.readAsDataURL(file);
   }
@@ -1120,7 +1030,7 @@
     saveData();
     renderActiveDog();
     closeAllModals();
-    showToast(`Vaccination ${name} logged!`);
+    showToast(`Vaccination ${name} saved!`);
   }
 
   // Medication Modal & Save
@@ -1292,14 +1202,14 @@
     dog.care = {
       bath: document.getElementById('formCareBath').value.trim(),
       nails: document.getElementById('formCareNails').value.trim(),
-      dental: dog.care?.dental || 'Standard dental chews',
+      dental: dog.care?.dental || '',
       behavior: document.getElementById('formCareBehavior').value.trim()
     };
 
     saveData();
     renderActiveDog();
     closeAllModals();
-    showToast('Diet & daily care notes updated!');
+    showToast('Diet & daily care notes saved!');
   }
 
   // Contacts Modal
@@ -1339,12 +1249,16 @@
     saveData();
     renderActiveDog();
     closeAllModals();
-    showToast('Emergency & veterinary contacts updated!');
+    showToast('Veterinary & emergency contacts saved!');
   }
 
   // ---------------- BACKUP & RESTORE ----------------
 
   function handleExportJSON() {
+    if (dogsData.length === 0) {
+      alert('No dog records to export yet.');
+      return;
+    }
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dogsData, null, 2));
     const downloadAnchor = document.createElement('a');
     const today = new Date().toISOString().split('T')[0];
@@ -1379,7 +1293,7 @@
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; // Reset input
+    e.target.value = '';
   }
 
   // ---------------- PRINT VET DOSSIER ----------------
@@ -1387,7 +1301,7 @@
   function handlePrintSummary() {
     const dog = getActiveDog();
     if (!dog) {
-      alert('Please select or add a dog first.');
+      alert('Please add a dog profile first before printing.');
       return;
     }
 
@@ -1534,7 +1448,7 @@
     }, 3200);
   }
 
-  // Simple HTML Escaping helper for XSS prevention
+  // HTML escaping helper
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
